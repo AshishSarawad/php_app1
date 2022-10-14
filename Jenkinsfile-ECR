@@ -1,16 +1,16 @@
 pipeline {
     agent any 
     environment {
-        registry = "287301745136.dkr.ecr.us-east-2.amazonaws.com/myphpapp"
+        registry = "386676070535.dkr.ecr.ca-central-1.amazonaws.com/myphpapp"
         //- update your credentials ID after creating credentials for connecting to Docker Hub
-        registryCredential = '10ea847d-ce0c-4f73-b7e4-af0270e924d8'
-        dockerImage = ''
+        registryCredential = 'ecr'
+        dockerImage = 'myphpapp'
     }
     
     stages {
         stage('Cloning Git') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/akannan1087/myPythonDockerRepo']]])       
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/AshishSarawad/php_app1.git']]])       
             }
         }
     
@@ -29,7 +29,7 @@ pipeline {
     stage('Upload Image') {
      steps{    
          script {
-            docker.withRegistry( 'https://287301745136.dkr.ecr.us-east-2.amazonaws.com', "ecr:us-east-2:$registryCredential" ) {
+            docker.withRegistry( 'https://386676070535.dkr.ecr.ca-central-1.amazonaws.com', "ecr:ca-central-1:$registryCredential" ) {
             docker.image("myphpapp"). push('latest')
             }
         }
@@ -40,8 +40,8 @@ pipeline {
      // Stopping Docker containers for cleaner Docker run
      stage('docker stop container') {
          steps {
-            sh 'docker ps -f name=mypythonContainer -q | xargs --no-run-if-empty docker container stop'
-            sh 'docker container ls -a -fname=mypythonContainer -q | xargs -r docker container rm'
+            sh 'docker ps -f name=myphpContainer -q | xargs --no-run-if-empty docker container stop'
+            sh 'docker container ls -a -fname=myphpContainer -q | xargs -r docker container rm'
          }
        }
     
@@ -50,7 +50,7 @@ pipeline {
     stage('Docker Run') {
      steps{
          script {
-            dockerImage.run("-p 8096:5000 --rm --name mypythonContainer")
+            dockerImage.run("-p 8096:5000 --rm --name myphpContainer")
          }
       }
     }

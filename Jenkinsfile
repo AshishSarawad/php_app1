@@ -1,56 +1,67 @@
 pipeline {
-    agent any 
+    
+    agent any
+    
     environment {
-        //TODO # 1 --> once you sign up for Docker hub, use that user_id here
-        registry = "ananthkannan/myphp-app-may20"
-        //TODO #2 - update your credentials ID after creating credentials for connecting to Docker Hub
-        registryCredential = 'fa32f95a-2d3e-4c7b-8f34-11bcc0191d70'
+        imageName = "myphpapp"
+        registryCredentials = "nexus"
+        registry = "15.222.62.172:8082"
         dockerImage = ''
     }
     
     stages {
-        stage('Cloning Git') {
+        stage('Code checkout') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://bitbucket.org/ananthkannan/phprepo/']]])       
-            }
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/AshishSarawad/php_app1.git']]])                   }
         }
+        
     
-    // Building Docker images
-    stage('Building image') {
+        
+    stage('SonarQube Analysis') {
+        steps{
+            withSonarQubeEnv(installationName: 'sonarqube', credentialsId: 'sonar') {
+      sh "/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube/bin/sonar-scanner"
+            }
+                
+        }
+    }
+    
+    
+   
+    stage('Docker image build') {
       steps{
         script {
-          dockerImage = docker.build registry
+          dockerImage = docker.build imageName
+        }
+      }
+    }
+
+
+    stage('Image upload to Nexus') {
+     steps{  
+         script {
+             docker.withRegistry( 'http://'+registry, registryCredentials ) {
+             dockerImage.push('latest')
+           }
         }
       }
     }
     
-     // Uploading Docker images into Docker Hub
-    stage('Upload Image') {
-     steps{    
+   
+    stage('Stop container') {
+         steps {
+            sh 'docker ps -f name=myphpapp -q | xargs --no-run-if-empty docker container stop'
+            sh 'docker container ls -a -fname=myphpapp -q | xargs -r docker container rm'
+        }
+    }
+      
+    stage('Deploy') {
+       steps{
          script {
-            docker.withRegistry( '', registryCredential ) {
-            dockerImage.push()
+            dockerImage.run("-p 80:80 --rm --name myphpapp")
+               
             }
         }
-      }
-    }
-    
-     // Stopping Docker containers for cleaner Docker run
-     stage('docker stop container') {
-         steps {
-            sh 'docker ps -f name=myPhpContainer -q | xargs --no-run-if-empty docker container stop'
-            sh 'docker container ls -a -fname=myPhpContainer -q | xargs -r docker container rm'
-         }
-       }
-    
-    
-    // Running Docker container, make sure port 8096 is opened in 
-    stage('Docker Run') {
-     steps{
-         script {
-            dockerImage.run("-p 8086:80 --rm --name myPhpContainer")
-         }
-      }
-    }
-  }
+    }    
+ }
 }

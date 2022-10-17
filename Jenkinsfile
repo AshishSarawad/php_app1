@@ -41,7 +41,8 @@ pipeline {
      steps{  
          script {
              docker.withRegistry( 'http://'+registry, registryCredentials ) {
-             dockerImage.push('latest')
+              version = VersionNumber(versionNumberString: '1.0.${BUILDS_ALL_TIME}')
+             dockerImage.push('version')
            }
         }
       }

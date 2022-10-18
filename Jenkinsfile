@@ -5,7 +5,7 @@ pipeline {
     environment {
         imageName = "myphpapp"
         registryCredentials = "nexus"
-        registry = "15.222.62.172:8082"
+        registry = "99.79.78.137:8082"
         dockerImage = ''
     }
     

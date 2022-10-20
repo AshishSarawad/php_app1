@@ -64,11 +64,21 @@ pipeline {
             sh 'docker container ls -a -fname=myphpapp -q | xargs -r docker container rm'
         }
     }
+
+    stage('K8S Deploy') {
+        steps{   
+            script{
+                
+                sh ('kubectl apply -f  eks-deploy-k8s.yaml')
+                
+            }
+        }
+       }
       
     stage('Deploy') {
        steps{
          script {
-            dockerImage.run("-p 80:80 --rm --name myphpapp")
+            dockerImage.run("-p 8008:80 --rm --name myphpapp")
                
             }
         }

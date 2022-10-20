@@ -81,7 +81,7 @@ pipeline {
         steps{   
             script{
                 
-                sh ('kubectl apply -f  eks-deploy-k8s.yaml')
+                sh ('kubectl apply -f  phpK8SDeploy.yml')
                 
             }
         }

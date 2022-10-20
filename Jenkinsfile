@@ -79,7 +79,7 @@ pipeline {
  post {
     failure {  
       emailext attachLog: true,  body: '''
-    Please Check the Code!! THE BUILD HAS FAILED
+    ${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}
  ''',    
     mimeType: 'text/html',
     subject: "failed",

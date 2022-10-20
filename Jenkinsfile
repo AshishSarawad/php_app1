@@ -5,14 +5,18 @@ pipeline {
     environment {
         imageName = "myphpapp"
         registryCredentials = "nexus"
-        registry = "35.183.4.199:8082"
+        registry = "35.183.93.44:8082"
         dockerImage = ''
     }
     
     stages {
         stage('Code checkout') {
             steps {
+
                 checkout([$class: 'GitSCM', branches: [[name: '*/dev']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/AshishSarawad/php_app1.git']]])                   }
+
+                checkout([$class: 'GitSCM', branches: [[name: '*/feature1']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/AshishSarawad/php_app1.git']]])                   }
+
         }
         
     
@@ -25,6 +29,15 @@ pipeline {
                 
         }
     }
+
+     
+    stage("Quality Gate") {
+            steps {
+              timeout(time: 1, unit: 'HOURS') {
+                waitForQualityGate abortPipeline: true
+              }
+            }
+          }   
     
     
    
@@ -63,6 +76,29 @@ pipeline {
                
             }
         }
+
     }    
  }
 }
+
+
+    } 
+  }
+
+ post {
+    failure {  
+    emailext attachLog: true,  
+    body:"${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}",    
+    mimeType: 'text/html',
+    subject: "failed",
+    from: "ashishsarawad@zohomail.in",
+    to: "ashishsarawad@gmail.com",
+    recipientProviders: [[$class: 'CulpritsRecipientProvider']]
+         }  
+    }
+}   
+
+     
+      
+  
+

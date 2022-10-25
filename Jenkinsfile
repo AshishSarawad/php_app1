@@ -65,15 +65,7 @@ pipeline {
         }
     }
 
-    stage('K8S Deploy') {
-        steps{   
-            script{
-                
-                sh ('kubectl apply -f  eks-deploy-k8s.yaml')
-                
-            }
-        }
-       }
+   
       
     stage('Deploy') {
        steps{
@@ -84,7 +76,17 @@ pipeline {
         }
 
     } 
-  }  
+    
+     stage('K8S Deploy') {
+        steps{   
+            script{
+                
+                sh ('kubectl apply -f  phpK8SDeploy.yml')
+                
+            }
+        }
+       }
+    }
   
 
  post {

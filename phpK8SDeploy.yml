@@ -12,7 +12,7 @@ spec:
         name: phpapp
     spec:
       containers:
-      - image: http://3.96.203.160:8082/myphpapp:1.9
+      - image: http://3.96.203.160:8082/myphpapp:1.13
         name: phpapp
         ports: 
         - name: phpapp
@@ -28,8 +28,8 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: 8085
-      targetPort: 8085
+    - port: 8086
+      targetPort: 8086
   selector:
     name: phpapp
 ---
